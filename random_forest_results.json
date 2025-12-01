@@ -1,0 +1,37 @@
+[
+    {
+        "Seed": 1234,
+        "Accuracy": 1.0,
+        "Sensitivity": 1.0,
+        "Specificity": 1.0,
+        "F1 score": 1.0
+    },
+    {
+        "Seed": 5678,
+        "Accuracy": 1.0,
+        "Sensitivity": 1.0,
+        "Specificity": 1.0,
+        "F1 score": 1.0
+    },
+    {
+        "Seed": 2025,
+        "Accuracy": 1.0,
+        "Sensitivity": 1.0,
+        "Specificity": 1.0,
+        "F1 score": 1.0
+    },
+    {
+        "Seed": 2004,
+        "Accuracy": 1.0,
+        "Sensitivity": 1.0,
+        "Specificity": 1.0,
+        "F1 score": 1.0
+    },
+    {
+        "Seed": 2016,
+        "Accuracy": 1.0,
+        "Sensitivity": 1.0,
+        "Specificity": 1.0,
+        "F1 score": 1.0
+    }
+]
