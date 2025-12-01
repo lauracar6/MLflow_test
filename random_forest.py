@@ -3,11 +3,38 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, recall_score, f1_score, confusion_matrix
 import matplotlib.pyplot as plt
-import seaborn as sns
+#import seaborn as sns
 from scipy.stats import randint
 from sklearn.model_selection import RandomizedSearchCV, train_test_split
 import json
 from sklearn import metrics
+
+# imports realted to mlflow
+import mlflow
+import mlflow.sklearn
+
+# For finding the best model
+from mlflow.tracking.client import MlflowClient
+from mlflow.entities import ViewType
+
+
+nome_experiencia = "TesteModeloRF" # It can contain whitespaces or special characters, but it will make code commands harder to perform
+
+# Provide an Experiment description that will appear in the UI
+descrição_experiencia = (
+"Teste de MLflow com um modelo de Random Forest que treina e testa com todos os dados"
+)
+experiment_tags = {
+    "mlflow.note.content": descrição_experiencia,
+}
+
+# Check if the experiment already exists, if not, create it
+experiment = mlflow.get_experiment_by_name(nome_experiencia)
+if experiment is None:
+    mlflow.create_experiment(
+    name=nome_experiencia, tags=experiment_tags
+    )
+
 
 df = pd.read_csv('dataset_join_preprocess.csv')
 
