@@ -17,6 +17,18 @@ import mlflow.sklearn
 from mlflow.tracking.client import MlflowClient
 from mlflow.entities import ViewType
 
+df = pd.read_csv('dataset_join_preprocess.csv')
+
+# como as decision trees nao sao sensiveis à magnitude dos dados nao os vou normalizar
+
+#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42) 
+
+seeds = [1234, 5678, 2025, 2004, 2016] # neste caso uma seed diferente vai corresponder a uma run diferente
+
+# começamos por extrair o X e o y do dataset
+X = df.drop(columns=['Class'])
+y = df['Class']
+
 
 nome_experiencia = "TesteModeloRF" # It can contain whitespaces or special characters, but it will make code commands harder to perform
 
@@ -39,53 +51,35 @@ if experiment is None:
 # definir a experiencia para esta que acabou de ser criada
 mlflow.set_experiment(experiment_name=nome_experiencia)
 
-
-df = pd.read_csv('dataset_join_preprocess.csv')
-
-# como as decision trees nao sao sensiveis à magnitude dos dados nao os vou normalizar
-
-#X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42) 
-
-seeds = [1234, 5678, 2025, 2004, 2016]
-
-# começamos por extrair o X e o y do dataset
-X = df.drop(columns=['Class'])
-y = df['Class']
-
-dictionaries = [] # criar lista vazia para os dicionários todos
-confusion_matrices = []
-
 # aplicamos aqui o modelo
 for seed in seeds:
 
     rf_model = RandomForestClassifier(random_state=seed, class_weight='balanced')
 
-    rf_model.fit(X, y)
+    test_run_name = f"Manual_run_test_seed_{seed}"
 
-    y_pred = rf_model.predict(X)
+    with mlflow.start_run(run_name=test_run_name):
 
-    conf_matrix = metrics.confusion_matrix (y,y_pred)
-    confusion_matrices.append(conf_matrix)
-    #print(f"Matriz de confusão: {conf_matrix}")
+        rf_model.fit(X, y)
 
-    
-    #Não sei se estas métricas serão necessárias ter aqui calculadas uma vez que tenho de perceber se o autologging faz isto
-    acc = metrics.accuracy_score(y, y_pred=y_pred)
-    sens = metrics.recall_score(y, y_pred=y_pred)
-    spe = metrics.recall_score(y,y_pred=y_pred,pos_label=0)
-    f1 = metrics.f1_score(y, y_pred=y_pred)
+        y_pred = rf_model.predict(X)
 
-    dictionaries.append({
-        "Seed": seed,
-        "Accuracy": acc,
-        "Sensitivity": sens,
-        "Specificity": spe,
-        "F1 score": f1
-    })
+        #conf_matrix = metrics.confusion_matrix (y,y_pred)
+        #print(f"Matriz de confusão: {conf_matrix}")
 
-# guardar resultados num ficheiro json (codigo do geeks for geeks)
-with open('random_forest_results.json', 'w') as json_file: 
-    json.dump(dictionaries, json_file, indent=4)
+        
+        #Não sei se estas métricas serão necessárias ter aqui calculadas uma vez que tenho de perceber se o autologging faz isto
+        acc = metrics.accuracy_score(y, y_pred=y_pred)
+        mlflow.log_metric("accuracy", acc)
+        sens = metrics.recall_score(y, y_pred=y_pred)
+        mlflow.log_metric("sensitivity", sens)
+        spe = metrics.recall_score(y,y_pred=y_pred,pos_label=0)
+        mlflow.log_metric("specificity", spe)
+        f1 = metrics.f1_score(y, y_pred=y_pred)
+        mlflow.log_metric("f1_score", f1)
+
+    #mlflow.end_run() # aparentemente nao suar isto segundo o chat
+
     
 
     
