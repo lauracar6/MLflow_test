@@ -24,6 +24,7 @@ nome_experiencia = "TesteModeloRF" # It can contain whitespaces or special chara
 descrição_experiencia = (
 "Teste de MLflow com um modelo de Random Forest que treina e testa com todos os dados"
 )
+
 experiment_tags = {
     "mlflow.note.content": descrição_experiencia,
 }
@@ -35,6 +36,9 @@ if experiment is None:
     name=nome_experiencia, tags=experiment_tags
     )
 
+# definir a experiencia para esta que acabou de ser criada
+mlflow.set_experiment(experiment_name=nome_experiencia)
+
 
 df = pd.read_csv('dataset_join_preprocess.csv')
 
@@ -44,52 +48,47 @@ df = pd.read_csv('dataset_join_preprocess.csv')
 
 seeds = [1234, 5678, 2025, 2004, 2016]
 
-def random_forest_model(df, seeds):
-    # começamos por extrair o X e o y do dataset
-    X = df.drop(columns=['Class'])
-    y = df['Class']
+# começamos por extrair o X e o y do dataset
+X = df.drop(columns=['Class'])
+y = df['Class']
 
-    dictionaries = [] # criar lista vazia para os dicionários todos
-    confusion_matrices = []
+dictionaries = [] # criar lista vazia para os dicionários todos
+confusion_matrices = []
+
+# aplicamos aqui o modelo
+for seed in seeds:
+
+    rf_model = RandomForestClassifier(random_state=seed, class_weight='balanced')
+
+    rf_model.fit(X, y)
+
+    y_pred = rf_model.predict(X)
+
+    conf_matrix = metrics.confusion_matrix (y,y_pred)
+    confusion_matrices.append(conf_matrix)
+    #print(f"Matriz de confusão: {conf_matrix}")
+
     
-    # aplicamos aqui o modelo
-    for seed in seeds:
-     
-        rf_model = RandomForestClassifier(random_state=seed, class_weight='balanced')
+    #Não sei se estas métricas serão necessárias ter aqui calculadas uma vez que tenho de perceber se o autologging faz isto
+    acc = metrics.accuracy_score(y, y_pred=y_pred)
+    sens = metrics.recall_score(y, y_pred=y_pred)
+    spe = metrics.recall_score(y,y_pred=y_pred,pos_label=0)
+    f1 = metrics.f1_score(y, y_pred=y_pred)
 
-        rf_model.fit(X, y)
+    dictionaries.append({
+        "Seed": seed,
+        "Accuracy": acc,
+        "Sensitivity": sens,
+        "Specificity": spe,
+        "F1 score": f1
+    })
 
-        y_pred = rf_model.predict(X)
-
-        conf_matrix = metrics.confusion_matrix (y,y_pred)
-        confusion_matrices.append(conf_matrix)
-        #print(f"Matriz de confusão: {conf_matrix}")
-
-        
-        #Não sei se estas métricas serão necessárias ter aqui calculadas uma vez que tenho de perceber se o autologging faz isto
-        acc = metrics.accuracy_score(y, y_pred=y_pred)
-        sens = metrics.recall_score(y, y_pred=y_pred)
-        spe = metrics.recall_score(y,y_pred=y_pred,pos_label=0)
-        f1 = metrics.f1_score(y, y_pred=y_pred)
-
-        dictionaries.append({
-            "Seed": seed,
-            "Accuracy": acc,
-            "Sensitivity": sens,
-            "Specificity": spe,
-            "F1 score": f1
-        })
-
-    # guardar resultados num ficheiro json (codigo do geeks for geeks)
-    with open('random_forest_results.json', 'w') as json_file: 
-        json.dump(dictionaries, json_file, indent=4)
-        
-
-    return confusion_matrices, dictionaries
+# guardar resultados num ficheiro json (codigo do geeks for geeks)
+with open('random_forest_results.json', 'w') as json_file: 
+    json.dump(dictionaries, json_file, indent=4)
     
-rf_conf_matrices, metrics_list = random_forest_model(df,seeds)
 
-print(rf_conf_matrices[1])
+    
 
 
 
