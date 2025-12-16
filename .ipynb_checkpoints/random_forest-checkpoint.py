@@ -3,11 +3,11 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, recall_score, f1_score, confusion_matrix
 import matplotlib.pyplot as plt
+#import seaborn as sns
 from scipy.stats import randint
 from sklearn.model_selection import RandomizedSearchCV, train_test_split
+import json
 from sklearn import metrics
-import os
-import seaborn as sns
 
 # imports realted to mlflow
 import mlflow
@@ -16,14 +16,6 @@ import mlflow.sklearn
 # For finding the best model
 from mlflow.tracking.client import MlflowClient
 from mlflow.entities import ViewType
-
-# confirmar que é este script que está a ser executado (do chat)
-print("=== SCRIPT RANDOM_FOREST.PY A EXECUTAR ===")
-
-
-# antes de começar verificar se a working directory corresponde com a diretoria em que o mlflow está a ser trabalhado (do chat)
-print("Working directory:", os.getcwd()) #vai me dizer qual é a diretoria do ficheiro que estou a correr
-print("MLflow tracking URI:", mlflow.get_tracking_uri()) #diz-me a diretoria onde as runs do mlflow estão a acontecer (estão a ser loaded?)
 
 df = pd.read_csv('dataset_join_preprocess.csv')
 
@@ -37,7 +29,6 @@ seeds = [1234, 5678, 2025, 2004, 2016] # neste caso uma seed diferente vai corre
 X = df.drop(columns=['Class'])
 y = df['Class']
 
-classes = ['Vaginal Delivery', 'C-section'] # do chat
 
 nome_experiencia = "TesteModeloRF" # It can contain whitespaces or special characters, but it will make code commands harder to perform
 
@@ -73,27 +64,9 @@ for seed in seeds:
 
         y_pred = rf_model.predict(X)
 
-        conf_matrix = metrics.confusion_matrix (y,y_pred)
+        #conf_matrix = metrics.confusion_matrix (y,y_pred)
         #print(f"Matriz de confusão: {conf_matrix}")
 
-        # plot da matriz de confusão
-        fig, ax = plt.subplots()
-        tick_marks = np.arange(len(classes))
-        plt.xticks(tick_marks, classes)
-        plt.yticks(tick_marks, classes)
-
-        sns.heatmap(pd.DataFrame(conf_matrix), annot=True, cmap="YlGnBu", fmt='g', ax=ax)
-
-        ax.xaxis.set_label_position("top")
-        plt.tight_layout()
-        plt.title(f'Matriz de confusão - SEED {seed}', y=1.1)
-        plt.ylabel('Label Verdadeiro')
-        plt.xlabel('Label Previsto')
-
-        fig_path = f"confusion_matrix_{seed}.png"
-        fig.savefig(fig_path)
-        plt.close(fig)
-        mlflow.log_artifact(fig_path)
         
         #Não sei se estas métricas serão necessárias ter aqui calculadas uma vez que tenho de perceber se o autologging faz isto
         acc = metrics.accuracy_score(y, y_pred=y_pred)
