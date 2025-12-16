@@ -3,11 +3,10 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, recall_score, f1_score, confusion_matrix
 import matplotlib.pyplot as plt
-#import seaborn as sns
 from scipy.stats import randint
 from sklearn.model_selection import RandomizedSearchCV, train_test_split
-import json
 from sklearn import metrics
+import os
 
 # imports realted to mlflow
 import mlflow
@@ -16,6 +15,14 @@ import mlflow.sklearn
 # For finding the best model
 from mlflow.tracking.client import MlflowClient
 from mlflow.entities import ViewType
+
+# confirmar que é este script que está a ser executado (do chat)
+print("=== SCRIPT RANDOM_FOREST.PY A EXECUTAR ===")
+
+
+# antes de começar verificar se a working directory corresponde com a diretoria em que o mlflow está a ser trabalhado (do chat)
+print("Working directory:", os.getcwd()) #vai me dizer qual é a diretoria do ficheiro que estou a correr
+print("MLflow tracking URI:", mlflow.get_tracking_uri()) #diz-me a diretoria onde as runs do mlflow estão a acontecer (estão a ser loaded?)
 
 df = pd.read_csv('dataset_join_preprocess.csv')
 
