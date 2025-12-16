@@ -105,9 +105,22 @@ for seed in seeds:
         f1 = metrics.f1_score(y, y_pred=y_pred)
         mlflow.log_metric("f1_score", f1)
 
-    #mlflow.end_run() # aparentemente nao suar isto segundo o chat
+    #mlflow.end_run() # aparentemente nao usar isto segundo o chat
 
-    
+"""
+experiencia_atual = dict(mlflow.get_experiment_by_name(nome_experiencia))
+
+id_experiencia = experiencia_atual["experiment_id"] # Extract the experiment ID
+
+df_busca_resultados = mlflow.search_runs(
+    experiment_ids=id_experiencia, # Define the scope of the search
+    run_view_type=ViewType.ALL, # Select the type of run
+    output_format="pandas", # Select the output format
+)
+
+print(df_busca_resultados)
+
+"""  
 
     
 
